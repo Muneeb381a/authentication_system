@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import { createUser, findUserByEmail } from "../models/UserModel.js";
 import generateToken from "../utils/generateToken.js";
+import dotenv from "dotenv"
+
+dotenv.config();
 
 export const register = async (req, res) => {
   try {
@@ -14,11 +17,18 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "User already exists." });
     }
 
+    // Check if password is provided and is long enough
+    if (!password || password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long." });
+    }
+
     // Hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Upload profile image to Cloudinary
+    // Upload profile image to Cloudinary if file is provided
     let profileImageUrl = null;
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path);
@@ -36,6 +46,7 @@ export const register = async (req, res) => {
     // Generate a token for the new user
     const token = generateToken(newUser.id);
 
+    // Respond with user details and token
     res.status(201).json({
       message: "User registered successfully.",
       user: {
@@ -71,6 +82,7 @@ export const login = async (req, res) => {
     // Generate a token for the user
     const token = generateToken(user.id);
 
+    // Respond with user details and token
     res.status(200).json({
       message: "User logged in successfully.",
       user: {
