@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js"; // Assuming you have Cloudinary config
-import { createUser, findUserByEmail } from "../models/UserModel.js";
+import { createUser, findUserByEmail, findUserById } from "../models/UserModel.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -92,20 +92,6 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error("Error logging in user:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
-  }
-};
-
-export const getUserProfile = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const user = await findUserByEmail(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json({ user });
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
